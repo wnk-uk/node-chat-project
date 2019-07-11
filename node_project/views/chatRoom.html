@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>클라이언트01</title>    
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="/script/server.js"></script>
+<style>
+::-webkit-scrollbar { display:none; }
+</style>
+<body>
+    <h3 style="text-align:center">채팅방</h3>    
+    
+    <div style="text-align:right;">
+        <table width="100%">
+            <tr>
+                <td width="80%"><input type="text" id="searchInput" style="width:100%; display:none"/></td>
+                <td><i class="material-icons searchNameIcon" style="cursor:pointer; margin-top:8px;">search</i>&nbsp;<i class="material-icons addIcon" style="cursor:pointer; margin-top:8px;">add</i></td>
+            </tr>
+        </table>
+        
+    </div>
+    <hr/>
+    
+    <div class="scroll" style="width:100%; -ms-overflow-style: none; overflow-y:scroll; height:300px">
+        <table style="width:100%">
+            
+        </table>
+    </div>
+    <br>
+    <hr>
+    <div class="changeBtn" style="text-align:center">
+        <button id="chatList">전환</button>
+        <button id="chatRoom">전환</button>
+    </div>
+    <input type="text" id="userId" value=<%= session.userId %>>
+    <input type="text" id="userName" value=<%= session.userName %>>
+    
+    
+    <!-- Trigger the modal with a button -->
+<button type="button" class="btn btn-info btn-lg modalBtn" data-toggle="modal" data-target="#myModal" style="display:none">Open Modal</button>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">채팅방 추가</h4>
+      </div>
+      <div class="modal-body">
+        <table width="100%">
+			<tr>
+				<td>채팅방 제목 : </td>
+				<td><input type="text" style="width:100%" id="chatName"/></td>
+			</tr>
+		</table>
+			<br>
+			<h5 style="width:100%; text-align:center;">채팅방 인원</h5>
+		  <div class="scroll_modal" style="width:100%; -ms-overflow-style: none; overflow-y:scroll; height:250px">
+		  	<table style="width:100%">
+                
+        </table>
+		  </div>	
+		
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default cancleBtn" data-dismiss="modal">취소</button>
+		  <button type="button" class="btn btn-default createBtn">생성</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+    
+    
+<script>
+	//var socket = io();
+     $(".searchNameIcon").click(function(){
+        var $searchInput = $("#searchInput");
+         if($searchInput.css("display") == 'inline-block' && $searchInput.val() != ""){
+        }  
+        if($searchInput.css("display") == 'inline-block'){
+            $searchInput.css("display","none");
+            $searchInput.val("");
+        }else{
+            $searchInput.css("display","inline");
+        }
+         
+     });
+    
+     $(".addIcon").click(function(){
+            $(".modalBtn").click();
+    });
+	
+	$("#chatRoom").click(function(){
+        alert("눌림");
+        location.href="/chatRoom"
+    });
+	
+	$("#chatList").click(function(){
+		location.href="/chatList";						 
+	})
+	
+	$(".createBtn").click(function(){
+		var chatName = $("#chatName").val();
+		var $input = $("input[type='checkbox']:checked");
+		if(chatName == ""){
+			alert("채팅방 이름을 입력하세요");   
+		}
+		if($input.length < 1){
+			alert("채팅방 사용자를 추가하세요");
+		}	
+			
+			var chatUsers = new Array();
+			var chatRoomInfo;
+			
+			for(var i =0; i<$input.length; i++){
+				chatUsers.push($input.eq(i).parent().siblings(":first").text());
+			}
+			console.log(chatUsers);
+			
+			chatRoomInfo = {
+							  'command':'create',
+							  'chatName':chatName,
+							  'createUser':'<%=session.userId%>',
+							  'chatList':chatUsers
+							}
+			
+			console.log(chatRoomInfo);
+			
+			socket.emit('room', chatRoomInfo);
+		   
+	});
+	
+	socket.on('room', function(data){
+		console.log(data);
+	});
+	
+	
+	//페이지 전환
+	$("#chatRoom").click(function(){
+        location.href="/chat/room";
+			
+    });
+		
+	$("#chatList").click(function(){
+		location.href="/chat/list";						 
+	});
+		
+	
+	
+</script>
+</body>    
+</html>
